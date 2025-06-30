@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>编程教育智能体 - AI代码助手</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+
+  <!-- Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f6ff',
+              100: '#e0edff',
+              200: '#c9e0ff',
+              300: '#a8cfff',
+              400: '#86b5ff',
+              500: '#5e95ff',
+              600: '#3c7cff',
+              700: '#165DFF',
+              800: '#004eeb',
+              900: '#0037a8'
+            },
+            secondary: {
+              50: '#f0f9f8',
+              100: '#d6f2f0',
+              200: '#b0e5e1',
+              300: '#84d8d2',
+              400: '#5ccbc3',
+              500: '#36CFC9',
+              600: '#20a8a2',
+              700: '#1a8782',
+              800: '#156965',
+              900: '#0f4b48'
+            },
+            accent: {
+              50: '#f8f0fe',
+              100: '#f0e0fd',
+              200: '#e2c1fb',
+              300: '#d09cf8',
+              400: '#bc77f5',
+              500: '#a450f2',
+              600: '#8a2cef',
+              700: '#722ED1',
+              800: '#5a23a9',
+              900: '#42197c'
+            },
+            dark: {
+              50: '#f5f6f7',
+              100: '#e5e7ea',
+              200: '#d0d4d9',
+              300: '#b1b8c1',
+              400: '#8a95a2',
+              500: '#6b7886',
+              600: '#525d69',
+              700: '#3d464f',
+              800: '#2a3037',
+              900: '#1D2129'
+            },
+            light: {
+              50: '#ffffff',
+              100: '#fcfcfd',
+              200: '#f8f9fa',
+              300: '#f2f3f5',
+              400: '#e5e7eb',
+              500: '#d1d5db',
+              600: '#9ca3af',
+              700: '#6b7280',
+              800: '#4b5563',
+              900: '#374151'
+            }
+          },
+          fontFamily: {
+            inter: ['Inter', 'sans-serif'],
+            mono: ['Consolas', 'Monaco', 'monospace']
+          },
+          boxShadow: {
+            'card': '0 4px 20px rgba(0, 0, 0, 0.08)',
+            'hover': '0 8px 30px rgba(0, 0, 0, 0.12)',
+            'inner': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+
+      .scrollbar-thin::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 3px;
+      }
+
+      .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .typing-animation::after {
+        content: '|';
+        animation: typing 1s infinite;
+      }
+
+      @keyframes typing {
+        0%, 100% {
+          opacity: 1;
+        }
+
+        50% {
+          opacity: 0;
+        }
+      }
+
+      .message-appear {
+        animation: messageAppear 0.3s ease-out;
+      }
+
+      @keyframes messageAppear {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .gradient-bg {
+        background: linear-gradient(135deg, #165DFF 0%, #722ED1 100%);
+      }
+
+      .glass-effect {
+        backdrop-filter: blur(10px);
+        background-color: rgba(255, 255, 255, 0.7);
+      }
+
+      .dark .glass-effect {
+        background-color: rgba(30, 30, 30, 0.7);
+      }
+
+      .editor-line-numbers {
+        width: 2.5rem;
+        text-align: right;
+        padding-right: 1rem;
+        user-select: none;
+        color: #888;
+        border-right: 1px solid #ddd;
+        font-family: monospace;
+        font-size: 0.875rem;
+        line-height: 1.5;
+      }
+
+      .dark .editor-line-numbers {
+        color: #777;
+        border-right-color: #444;
+      }
+
+      .code-block {
+        position: relative;
+      }
+
+      .code-block pre {
+        border-radius: 0.5rem;
+        padding: 1rem;
+        overflow-x: auto;
+      }
+
+      .code-copy-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        color: white;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+
+      .code-block:hover .code-copy-btn {
+        opacity: 1;
+      }
+
+      .code-copy-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .markdown-content p {
+        margin-bottom: 1rem;
+      }
+
+      .markdown-content ul, 
+      .markdown-content ol {
+        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+      }
+
+      .markdown-content li {
+        margin-bottom: 0.5rem;
+      }
+
+      .markdown-content code:not(.hljs) {
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+        font-family: monospace;
+        font-size: 0.9em;
+      }
+
+      .dark .markdown-content code:not(.hljs) {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .markdown-content pre {
+        margin-bottom: 1rem;
+      }
+
+      .markdown-content blockquote {
+        border-left: 3px solid #ddd;
+        padding-left: 1rem;
+        margin-left: 0;
+        margin-bottom: 1rem;
+        color: #666;
+      }
+
+      .dark .markdown-content blockquote {
+        border-left-color: #555;
+        color: #aaa;
+      }
+
+      .markdown-content table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 1rem;
+      }
+
+      .markdown-content th, 
+      .markdown-content td {
+        border: 1px solid #ddd;
+        padding: 0.5rem;
+      }
+
+      .dark .markdown-content th,
+      .dark .markdown-content td {
+        border-color: #444;
+      }
+
+      .markdown-content th {
+        background-color: #f5f5f5;
+      }
+
+      .dark .markdown-content th {
+        background-color: #333;
+      }
+
+      /* 用户类型选择器样式 */
+      .user-type-selector {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        justify-content: center;
+        padding: 0.5rem 0;
+      }
+      
+      .user-type-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+      
+      .user-type-btn:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+      
+      .user-type-btn.active {
+        border-color: #165DFF;
+        background-color: rgba(22, 93, 255, 0.2);
+        color: white;
+      }
+      
+      .dark .user-type-btn {
+        background-color: rgba(30, 30, 30, 0.7);
+        color: #e5e7eb;
+      }
+      
+      .dark .user-type-btn.active {
+        background-color: rgba(22, 93, 255, 0.3);
+      }
+      
+      /* 步骤式回答样式 */
+      .step-by-step {
+        counter-reset: step;
+      }
+      
+      .step-by-step li {
+        position: relative;
+        padding-left: 2rem;
+        margin-bottom: 0.75rem;
+        list-style-type: none;
+      }
+      
+      .step-by-step li:before {
+        counter-increment: step;
+        content: counter(step);
+        position: absolute;
+        left: 0;
+        width: 1.5rem;
+        height: 1.5rem;
+        background-color: #165DFF;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+      }
+
+      /* 用户模式标签 */
+      .user-mode-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        background-color: rgba(22, 93, 255, 0.1);
+        color: #165DFF;
+        margin-top: 0.5rem;
+      }
+      
+      .dark .user-mode-tag {
+        background-color: rgba(22, 93, 255, 0.2);
+        color: #86b5ff;
+      }
+
+      /* 侧边栏样式 */
+      #sidebar {
+        height: calc(100vh - 4rem - 3.5rem);
+        position: sticky;
+        top: 7.5rem;
+      }
+
+      @media (max-width: 768px) {
+        #sidebar {
+          position: fixed;
+          z-index: 40;
+          left: -100%;
+          transition: left 0.3s;
+        }
+        
+        #sidebar.show {
+          left: 0;
+        }
+      }
+
+      .conversation-item {
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        margin-bottom: 0.5rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .conversation-item:hover {
+        background-color: rgba(22, 93, 255, 0.1);
+      }
+
+      .dark .conversation-item:hover {
+        background-color: rgba(22, 93, 255, 0.2);
+      }
+
+      .conversation-item.active {
+        background-color: rgba(22, 93, 255, 0.2);
+        color: #165DFF;
+      }
+
+      .dark .conversation-item.active {
+        background-color: rgba(22, 93, 255, 0.3);
+        color: #86b5ff;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-inter bg-light-200 text-dark-900 dark:bg-dark-900 dark:text-light-100 min-h-screen flex flex-col transition-colors duration-200">
+  <!-- 导航栏 -->
+  <header class="gradient-bg text-white shadow-lg z-10 sticky top-0">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <a href="#" class="flex items-center">
+          <i class="fa-solid fa-robot text-2xl"></i>
+          <h1 class="text-xl font-bold ml-2">编程教育智能体</h1>
+        </a>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button id="theme-toggle" class="p-2 rounded-full hover:bg-white/20 transition-colors" title="切换主题">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        <button id="clear-history" class="p-2 rounded-full hover:bg-white/20 transition-colors" title="清空历史">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+        <div class="flex space-x-1">
+          <button id="nav-chat" class="px-3 py-1 rounded-lg hover:bg-white/20 transition-colors flex items-center">
+            <i class="fa-solid fa-comment-dots mr-1"></i> 聊天
+          </button>
+          <button id="nav-code-analysis" class="px-3 py-1 rounded-lg hover:bg-white/20 transition-colors flex items-center">
+            <i class="fa-solid fa-code mr-1"></i> 代码评估
+          </button>
+          <button id="nav-code-optimize" class="px-3 py-1 rounded-lg hover:bg-white/20 transition-colors flex items-center">
+            <i class="fa-solid fa-bolt mr-1"></i> 代码优化
+          </button>
+          <button id="nav-question" class="px-3 py-1 rounded-lg hover:bg-white/20 transition-colors flex items-center">
+            <i class="fa-solid fa-question-circle mr-1"></i> 问题解答
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 用户类型选择器 -->
+  <div class="glass-effect sticky top-16 z-10">
+    <div class="container mx-auto px-4">
+      <div class="user-type-selector">
+        <button class="user-type-btn active" data-type="beginner">
+          <i class="fa-solid fa-child-reaching mr-1"></i> 初学者
+        </button>
+        <button class="user-type-btn" data-type="intermediate">
+          <i class="fa-solid fa-user-graduate mr-1"></i> 中级开发者
+        </button>
+        <button class="user-type-btn" data-type="advanced">
+          <i class="fa-solid fa-user-tie mr-1"></i> 高级开发者
+        </button>
+        <button class="user-type-btn" data-type="teacher">
+          <i class="fa-solid fa-chalkboard-user mr-1"></i> 教育工作者
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主内容区 -->
+  <div class="flex flex-1">
+    <!-- 侧边栏 -->
+    <div id="sidebar" class="w-64 bg-white dark:bg-dark-800 border-r border-gray-200 dark:border-dark-600 flex flex-col">
+      <div class="p-4 border-b border-gray-200 dark:border-dark-600">
+        <h3 class="font-semibold text-dark-900 dark:text-light-100">
+          <i class="fa-solid fa-history mr-2"></i>对话历史
+        </h3>
+      </div>
+      <div id="conversation-history" class="flex-1 overflow-y-auto p-2 scrollbar-thin">
+        <!-- 对话历史将通过JavaScript动态添加 -->
+      </div>
+      <div class="p-3 border-t border-gray-200 dark:border-dark-600">
+        <button id="clear-history-sidebar" class="w-full py-2 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 rounded-lg text-sm">
+          <i class="fa-solid fa-trash mr-1"></i>清空历史
+        </button>
+      </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <main class="flex-1 container mx-auto px-4 py-6 flex flex-col">
+      <!-- 聊天功能 -->
+      <div id="content-chat" class="space-y-6 hidden">
+        <div class="bg-white dark:bg-dark-800 rounded-xl shadow-card p-4">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-dark-900 dark:text-light-100 flex items-center">
+              <i class="fa-solid fa-comment-dots text-primary-600 dark:text-primary-400 mr-2"></i> AI聊天
+            </h2>
+            <div class="flex space-x-2">
+              <button id="clear-chat-history" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors" title="清空聊天记录">
+                <i class="fa-solid fa-trash text-gray-500 dark:text-gray-400"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="chat-messages" class="h-[500px] overflow-y-auto p-4 bg-gray-50 dark:bg-dark-700 rounded-lg space-y-4 scrollbar-thin">
+            <!-- 初始欢迎消息 -->
+            <div class="flex items-start space-x-3 message-appear">
+              <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white shrink-0">
+                <i class="fa-solid fa-robot"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="bg-white dark:bg-dark-600 p-3 rounded-lg shadow-sm markdown-content">
+                  <p>你好！我是编程教育智能体，可以帮助你解决编程问题、评估代码质量、优化代码性能以及解答技术问题。</p>
+                  <p>你可以尝试：</p>
+                  <ul>
+                    <li>直接向我提问编程相关问题</li>
+                    <li>粘贴代码让我评估质量</li>
+                    <li>让我优化你的代码性能</li>
+                  </ul>
+                  <p>请先选择上方适合你的用户类型，然后开始提问吧！</p>
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">刚刚</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 flex space-x-3">
+            <textarea id="question-input" rows="3"
+              class="flex-1 p-3 border border-gray-200 dark:border-dark-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-none bg-white dark:bg-dark-700 text-dark-900 dark:text-light-100"
+              placeholder="输入你的问题... (Shift+Enter发送)"></textarea>
+            <button id="ask-question"
+              class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors self-end">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 代码评估功能 -->
+      <div id="content-code-analysis" class="space-y-6 hidden">
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold text-dark-900 dark:text-light-100 flex items-center">
+            <i class="fa-solid fa-code text-secondary-600 dark:text-secondary-400 mr-2"></i> 代码评估
+          </h2>
+          <p class="text-gray-600 dark:text-gray-400 mt-1">输入你的代码，获取专业的评估和优化建议</p>
+        </div>
+
+        <div class="bg-white dark:bg-dark-800 rounded-xl shadow-card p-4 mb-6">
+          <div class="flex flex-col md:flex-row gap-4">
+            <!-- 代码语言选择 -->
+            <div class="mb-3 md:mb-0">
+              <label for="code-language-analysis"
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">代码语言</label>
+              <select id="code-language-analysis"
+                class="w-full p-2 border border-gray-200 dark:border-dark-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/50 bg-white dark:bg-dark-700 text-dark-900 dark:text-light-100">
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="java">Java</option>
+                <option value="csharp">C#</option>
+                <option value="cpp">C++</option>
+                <option value="php">PHP</option>
+                <option value="ruby">Ruby</option>
+                <option value="go">Go</option>
+                <option value="typescript">TypeScript</option>
+                <option value="swift">Swift</option>
+                <option value="kotlin">Kotlin</option>
+              </select>
+            </div>
+
+            <!-- 示例代码按钮 -->
+            <div class="flex-1 flex flex-col md:flex-row gap-3">
+              <button id="load-analysis-example"
+                class="flex-1 px-4 py-2 bg-gray-100 dark:bg-dark-700 text-dark-900 dark:text-light-100 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors flex items-center justify-center">
+                <i class="fa-solid fa-file-code mr-2"></i> 加载示例代码
+              </button>
+              <button id="clear-analysis-code"
+                class="flex-1 px-4 py-2 bg-gray-100 dark:bg-dark-700 text-dark-900 dark:text-light-100 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors flex items-center justify-center">
+                <i class="fa-solid fa-eraser mr-2"></i> 清空代码
+              </button>
+              <button id="copy-analysis-code"
+                class="flex-1 px-4 py-2 bg-gray-100 dark:bg-dark-700 text-dark-900 dark:text-light-100 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors flex items-center justify-center">
+                <i class="fa-solid fa-copy mr-2"></i> 复制代码
+              </button>
+            </div>
+          </div>
+
+          <!-- 代码编辑器 -->
+          <div class="mt-4 relative">
+            <div class="absolute top-3 right-3 z-10 flex space-x-2">
+              <button id="toggle-analysis-line-numbers"
+                class="text-xs text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 px-2 py-1 rounded bg-white/50 dark:bg-dark-700/50">
+                <i class="fa-solid fa-list-ol mr-1"></i> 行号
+              </button>
+              <button id="format-analysis-code"
+                class="text-xs text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 px-2 py-1 rounded bg-white/50 dark:bg-dark-700/50">
+                <i class="fa-solid fa-indent mr-1"></i> 格式化
+              </button>
+            </div>
+            <div class="flex h-[400px] border border-gray-200 dark:border-dark-600 rounded-lg overflow-hidden">
+              <div id="analysis-line-numbers" class="editor-line-numbers bg-gray-50 dark:bg-dark-700 p-3 overflow-y-auto scrollbar-thin">
+                <!-- 行号将通过JavaScript生成 -->
+              </div>
+              <textarea id="analysis-code-input"
+                class="flex-1 p-3 font-mono text-sm bg-white dark:bg-dark-700 text-dark-900 dark:text-light-100 focus:outline-none resize-none"
+                placeholder="在此粘贴你的代码..."></textarea>
+            </div>
+          </div>
+
+          <!-- 分析按钮 -->
+          <button id="analyze-code-btn"
+            class="mt-4 w-full py-3 bg-secondary-600 hover:bg-secondary-700 text-white rounded-lg transition-all flex items-center justify-center">
+            <i class="fa-solid fa-magnifying-glass mr-2"></i> 分析代码
+          </button>
+        </div>
+
+        <!-- 分析结果区域 -->
+        <div class="bg-white dark:bg-dark-800 rounded-xl shadow-card p-4">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-dark-900 dark:text-light-100">代码分析结果</h3>
+            <div class="flex space-x-2">
+              <button id="download-analysis-result"
+                class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors" title="下载结果">
+                <i class="fa-solid fa-download text-gray-500 dark:text-gray-400"></i>
+              </button>
+              <button id="share-analysis-result"
+                class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors" title="分享结果">
+                <i class="fa-solid fa-share-alt text-gray-500 dark:text-gray-400"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="analysis-results" class="hidden space-y-6 markdown-content">
+            <!-- 分析结果将通过JavaScript动态添加 -->
+          </div>
+          <div id="analysis-placeholder" class="flex flex-col items-center justify-center py-10 text-center">
+            <i class="fa-solid fa-magnifying-glass text-4xl text-gray-300 dark:text-dark-600 mb-3"></i>
+            <p class="text-gray-500 dark:text-gray-400">尚未进行代码分析</p>
+            <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">在上方输入代码并点击"分析代码"按钮</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 代码优化功能 -->
+      <div id="content-code-optimize" class="space-y-6 hidden">
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold text-dark-900 dark:text-light-100 flex items-center">
+            <i class="fa-solid fa-bolt text-secondary-600 dark:text-secondary-400 mr-2"></i> 代码优化
+          </h2>
+          <p class="text-gray-600 dark:text-gray-400 mt-1">输入你的代码，获取性能优化和代码质量提升建议</p>
+        </div>
+
+        <div class="bg-white dark:bg-dark-800 rounded-xl shadow-card p-4 mb-6">
+          <div class="flex flex-col md:flex-row gap-4">
+            <!-- 代码语言选择 -->
+            <div class="mb-3 md:mb-0">
+              <label for="code-language-optimize"
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">代码语言</label>
+              <select id="code-language-optimize"
+                class="w-full p-2 border border-gray-200 dark:border-dark-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/50 bg-white dark:bg-dark-700 text-dark-900 dark:text-light-100">
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="java">Java</option>
+                <option value="csharp">C#</option>
+                <option value="cpp">C++</option>
+                <option value="php">PHP</option>
+                <option value="ruby">Ruby</option>
+                <option value="go">Go</option>
+                <option value="typescript">TypeScript</option>
+                <option value="swift">Swift</option>
+                <option value="kotlin">Kotlin</option>
+              </select>
+            </div>
+
+            <!-- 优化选项 -->
+            <div class="mb-3 md:mb-0">
+              <label for="optimize-options"
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">优化目标</label>
+              <select id="optimize-options"
+                class="w-full p-2 border border-gray-200 dark:border-dark-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/50 bg-white dark:bg-dark-700 text-dark-900 dark:text-light-100">
+                <option value="performance">性能优化</option>
+                <option value="readability">可读性优化</option>
+                <option value="security">安全性优化</option>
+                <option value="all">综合优化</option>
+              </select>
+            </div>
+
+            <!-- 示例代码按钮 -->
+            <div class="flex-1 flex flex-col md:flex-row gap-3">
+              <button id="load-optimize-example"
+                class="flex-1 px-4 py-2 bg-gray-100 dark:bg-dark-700 text-dark-900 dark:text-light-100 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors flex items-center justify-center">
+                <i class="fa-solid fa-file-code mr-2"></i> 加载示例代码
+              </button>
+              <button id="clear-optimize-code"
+                class="flex-1 px-4 py-2 bg-gray-100 dark:bg-dark-700 text-dark-900 dark:text-light-100 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors flex items-center justify-center">
+                <i class="fa-solid fa-eraser mr-2"></i> 清空代码
+              </button>
+              <button id="copy-optimize-code"
+                class="flex-1 px-4 py-2 bg-gray-100 dark:bg-dark-700 text-dark-900 dark:text-light-100 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors flex items-center justify-center">
+                <i class="fa-solid fa-copy mr-2"></i> 复制代码
+              </button>
+            </div>
+          </div>
+
+          <!-- 代码编辑器 -->
+          <div class="mt-4 relative">
+            <div class="absolute top-3 right-3 z-10 flex space-x-2">
+              <button id="toggle-optimize-line-numbers"
+                class="text-xs text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 px-2 py-1 rounded bg-white/50 dark:bg-dark-700/50">
+                <i class="fa-solid fa-list-ol mr-1"></i> 行号
+              </button>
+              <button id="format-optimize-code"
+                class="text-xs text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 px-2 py-1 rounded bg-white/50 dark:bg-dark-700/50">
+                <i class="fa-solid fa-indent mr-1"></i> 格式化
+              </button>
+            </div>
+            <div class="flex h-[400px] border border-gray-200 dark:border-dark-600 rounded-lg overflow-hidden">
+              <div id="optimize-line-numbers" class="editor-line-numbers bg-gray-50 dark:bg-dark-700 p-3 overflow-y-auto scrollbar-thin">
+                <!-- 行号将通过JavaScript生成 -->
+              </div>
+              <textarea id="optimize-code-input"
+                class="flex-1 p-3 font-mono text-sm bg-white dark:bg-dark-700 text-dark-900 dark:text-light-100 focus:outline-none resize-none"
+                placeholder="在此粘贴你的代码..."></textarea>
+            </div>
+          </div>
+
+          <!-- 优化按钮 -->
+          <button id="optimize-code-btn"
+            class="mt-4 w-full py-3 bg-secondary-600 hover:bg-secondary-700 text-white rounded-lg transition-all flex items-center justify-center">
+            <i class="fa-solid fa-bolt mr-2"></i> 优化代码
+          </button>
+        </div>
+
+        <!-- 优化结果区域 -->
+        <div class="bg-white dark:bg-dark-800 rounded-xl shadow-card p-4">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-dark-900 dark:text-light-100">优化结果</h3>
+            <div class="flex space-x-2">
+              <button id="download-optimize-result"
+                class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors" title="下载结果">
+                <i class="fa-solid fa-download text-gray-500 dark:text-gray-400"></i>
+              </button>
+              <button id="share-optimize-result"
+                class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors" title="分享结果">
+                <i class="fa-solid fa-share-alt text-gray-500 dark:text-gray-400"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="optimization-results" class="hidden space-y-6 markdown-content">
+            <!-- 优化结果将通过JavaScript动态添加 -->
+          </div>
+          <div id="optimization-placeholder" class="flex flex-col items-center justify-center py-10 text-center">
+            <i class="fa-solid fa-bolt text-4xl text-gray-300 dark:text-dark-600 mb-3"></i>
+            <p class="text-gray-500 dark:text-gray-400">尚未进行代码优化</p>
+            <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">在上方输入代码并点击"优化代码"按钮</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 问题解答功能 -->
+      <div id="content-question" class="space-y-6 hidden">
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold text-dark-900 dark:text-light-100 flex items-center">
+            <i class="fa-solid fa-question-circle text-secondary-600 dark:text-secondary-400 mr-2"></i> 问题解答
+          </h2>
+          <p class="text-gray-600 dark:text-gray-400 mt-1">输入你的问题，获取详细的解答</p>
+        </div>
+
+        <div class="bg-white dark:bg-dark-800 rounded-xl shadow-card p-4">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-dark-900 dark:text-light-100">技术问题解答</h3>
+            <div class="flex space-x-2">
+              <button id="clear-qa-history"
+                class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors" title="清空历史">
+                <i class="fa-solid fa-trash text-gray-500 dark:text-gray-400"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="qa-messages" class="h-[500px] overflow-y-auto p-4 bg-gray-50 dark:bg-dark-700 rounded-lg space-y-4 scrollbar-thin">
+            <!-- 初始欢迎消息 -->
+            <div class="flex items-start space-x-3 message-appear">
+              <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white shrink-0">
+                <i class="fa-solid fa-robot"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="bg-white dark:bg-dark-600 p-3 rounded-lg shadow-sm markdown-content">
+                  <p>你好！我是编程教育智能助手，可以解答各种技术问题。</p>
+                  <p>你可以向我提问关于：</p>
+                  <ul>
+                    <li>编程语言语法和特性</li>
+                    <li>算法和数据结构</li>
+                    <li>框架和库的使用</li>
+                    <li>系统设计问题</li>
+                    <li>调试和错误解决</li>
+                  </ul>
+                  <p>请先选择上方适合你的用户类型，然后详细描述你的问题！</p>
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">刚刚</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 flex space-x-3">
+            <textarea id="question-input-qa" rows="3"
+              class="flex-1 p-3 border border-gray-200 dark:border-dark-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-none bg-white dark:bg-dark-700 text-dark-900 dark:text-light-100"
+              placeholder="输入你的技术问题... (Shift+Enter发送)"></textarea>
+            <button id="ask-question-qa"
+              class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors self-end">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 页脚 -->
+  <footer class="bg-white dark:bg-dark-800 border-t border-gray-200 dark:border-dark-600 py-4">
+    <div class="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400 text-sm">
+      <p>© 编程教育智能体. 所有权利保留.</p>
+      <p class="mt-1">使用智谱AI技术驱动</p>
+    </div>
+  </footer>
+
+  <!-- 加载中提示 -->
+  <div id="loading-indicator" class="fixed inset-0 bg-black/30 z-50 hidden flex items-center justify-center">
+    <div class="bg-white dark:bg-dark-800 rounded-xl p-6 shadow-lg flex flex-col items-center max-w-sm">
+      <div class="w-16 h-16 border-4 border-secondary-600/30 border-t-secondary-600 rounded-full animate-spin mb-4"></div>
+      <p class="text-lg font-medium text-dark-900 dark:text-light-100">处理中...</p>
+      <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">请稍候，我正在处理你的请求...</p>
+    </div>
+  </div>
+
+  <!-- 侧边栏切换按钮（移动端） -->
+  <button id="sidebar-toggle" class="fixed bottom-4 left-4 z-30 p-3 bg-primary-600 text-white rounded-full shadow-lg md:hidden">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
+  <script>
+    // 初始化页面
+    document.addEventListener('DOMContentLoaded', function() {
+      // 默认显示聊天页面
+      document.getElementById('content-chat').classList.remove('hidden');
+      document.getElementById('nav-chat').classList.add('bg-white/20');
+
+      // 初始化代码编辑器行号
+      updateLineNumbers('analysis-code-input', 'analysis-line-numbers');
+      updateLineNumbers('optimize-code-input', 'optimize-line-numbers');
+
+      // 监听代码输入变化
+      document.getElementById('analysis-code-input').addEventListener('input', function() {
+        updateLineNumbers('analysis-code-input', 'analysis-line-numbers');
+      });
+
+      document.getElementById('optimize-code-input').addEventListener('input', function() {
+        updateLineNumbers('optimize-code-input', 'optimize-line-numbers');
+      });
+
+      // 初始化Markdown渲染
+      marked.setOptions({
+        highlight: function(code, lang) {
+          const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+          return hljs.highlight(code, { language }).value;
+        },
+        langPrefix: 'hljs language-',
+        breaks: true,
+        gfm: true
+      });
+
+      // 添加代码复制功能
+      document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('code-copy-btn')) {
+          const codeBlock = e.target.closest('.code-block').querySelector('code');
+          navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = '已复制!';
+            setTimeout(() => {
+              e.target.textContent = originalText;
+            }, 2000);
+          });
+        }
+      });
+
+      // 用户类型选择功能
+      const userTypeBtns = document.querySelectorAll('.user-type-btn');
+      
+      function setActiveUserTypeBtn(type) {
+        userTypeBtns.forEach(btn => {
+          btn.classList.remove('active');
+          if (btn.dataset.type === type) {
+            btn.classList.add('active');
+          }
+        });
+      }
+      
+      userTypeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const type = btn.dataset.type;
+          setActiveUserTypeBtn(type);
+          
+          fetch('/set_user_type', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ user_type: type })
+          }).catch(err => {
+            console.error('设置用户类型失败:', err);
+            // 恢复之前的状态
+            const currentType = sessionStorage.getItem('userType') || 'beginner';
+            setActiveUserTypeBtn(currentType);
+          });
+          
+          // 保存到sessionStorage
+          sessionStorage.setItem('userType', type);
+        });
+      });
+      
+      // 初始化用户类型
+      const savedType = sessionStorage.getItem('userType') || 'beginner';
+      setActiveUserTypeBtn(savedType);
+      fetch('/set_user_type', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user_type: savedType })
+      }).catch(err => console.error('初始化用户类型失败:', err));
+
+      // 侧边栏切换功能
+      document.getElementById('sidebar-toggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('show');
+      });
+
+      // 对话历史管理
+      function updateConversationHistory() {
+        const historyContainer = document.getElementById('conversation-history');
+        
+        fetch('/get_conversations')
+          .then(response => response.json())
+          .then(data => {
+            if (data.status === 'success') {
+              historyContainer.innerHTML = '';
+              
+              data.conversations.forEach((conv, index) => {
+                const item = document.createElement('div');
+                item.className = 'conversation-item';
+                item.textContent = conv.title || `对话 ${index + 1}`;
+                item.addEventListener('click', () => {
+                  loadConversation(index);
+                });
+                historyContainer.appendChild(item);
+              });
+            }
+          })
+          .catch(error => {
+            console.error('获取对话历史失败:', error);
+          });
+      }
+
+      function loadConversation(conversationId) {
+        fetch(`/get_conversation/${conversationId}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.status === 'success') {
+              const chatMessages = document.getElementById('chat-messages');
+              chatMessages.innerHTML = '';
+              
+              data.conversation.history.forEach(message => {
+                const isUser = message.role === 'user';
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('flex', 'items-start', 'space-x-3', 'message-appear');
+                messageDiv.innerHTML = `
+                  <div class="w-8 h-8 rounded-full ${isUser ? 'bg-primary-600' : 'bg-secondary-600'} flex items-center justify-center text-white shrink-0">
+                    <i class="fa-solid ${isUser ? 'fa-user' : 'fa-robot'}"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="bg-white dark:bg-dark-600 p-3 rounded-lg shadow-sm ${isUser ? '' : 'markdown-content'}">
+                      ${isUser ? message.content : marked.parse(message.content)}
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">刚刚</div>
+                  </div>
+                `;
+                chatMessages.appendChild(messageDiv);
+              });
+              
+              chatMessages.scrollTop = chatMessages.scrollHeight;
+              
+              // 在移动端自动关闭侧边栏
+              if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.remove('show');
+              }
+            }
+          })
+          .catch(error => {
+            console.error('加载对话失败:', error);
+          });
+      }
+
+      // 清空侧边栏历史
+      document.getElementById('clear-history-sidebar').addEventListener('click', () => {
+        if (confirm('确定要清空所有对话历史吗？')) {
+          fetch('/clear_conversations', {
+            method: 'POST'
+          })
+          .then(() => {
+            updateConversationHistory();
+          })
+          .catch(error => {
+            console.error('清空对话历史失败:', error);
+          });
+        }
+      });
+
+      // 初始化时更新对话历史
+      updateConversationHistory();
+    });
+
+    // 导航切换
+    const navButtons = {
+      'nav-chat': 'content-chat',
+      'nav-code-analysis': 'content-code-analysis',
+      'nav-code-optimize': 'content-code-optimize',
+      'nav-question': 'content-question'
+    };
+
+    Object.entries(navButtons).forEach(([navId, contentId]) => {
+      const navBtn = document.getElementById(navId);
+      const content = document.getElementById(contentId);
+
+      navBtn.addEventListener('click', () => {
+        // 隐藏所有内容
+        document.querySelectorAll('[id^="content-"]').forEach(el => {
+          el.classList.add('hidden');
+        });
+
+        // 移除所有导航按钮的激活状态
+        document.querySelectorAll('[id^="nav-"]').forEach(el => {
+          el.classList.remove('bg-white/20');
+        });
+
+        // 显示当前内容并激活当前导航按钮
+        content.classList.remove('hidden');
+        navBtn.classList.add('bg-white/20');
+      });
+    });
+
+    // 更新行号函数
+    function updateLineNumbers(textareaId, lineNumbersId) {
+      const textarea = document.getElementById(textareaId);
+      const lineNumbers = document.getElementById(lineNumbersId);
+      const lines = textarea.value.split('\n').length;
+      
+      let lineNumbersHTML = '';
+      for (let i = 1; i <= lines; i++) {
+        lineNumbersHTML += i + '\n';
+      }
+      
+      lineNumbers.innerHTML = lineNumbersHTML;
+      lineNumbers.scrollTop = textarea.scrollTop;
+    }
+
+    // 切换行号显示
+    function toggleLineNumbers(textareaId, lineNumbersId, toggleBtnId) {
+      const lineNumbers = document.getElementById(lineNumbersId);
+      const toggleBtn = document.getElementById(toggleBtnId);
+      
+      if (lineNumbers.style.display === 'none') {
+        lineNumbers.style.display = 'block';
+        toggleBtn.innerHTML = '<i class="fa-solid fa-list-ol mr-1"></i> 行号';
+      } else {
+        lineNumbers.style.display = 'none';
+        toggleBtn.innerHTML = '<i class="fa-solid fa-list-ol mr-1"></i> 显示行号';
+      }
+    }
+
+    document.getElementById('toggle-analysis-line-numbers').addEventListener('click', () => {
+      toggleLineNumbers('analysis-code-input', 'analysis-line-numbers', 'toggle-analysis-line-numbers');
+    });
+
+    document.getElementById('toggle-optimize-line-numbers').addEventListener('click', () => {
+      toggleLineNumbers('optimize-code-input', 'optimize-line-numbers', 'toggle-optimize-line-numbers');
+    });
+
+    // 加载示例代码
+    const exampleCodes = {
+      python: `# Python示例代码 - 计算斐波那契数列
+def fibonacci(n):
+    """计算斐波那契数列的前n项"""
+    if n <= 0:
+        return []
+    elif n == 1:
+        return [0]
+    elif n == 2:
+        return [0, 1]
+    
+    fib = [0, 1]
+    for i in range(2, n):
+        fib.append(fib[i-1] + fib[i-2])
+    return fib
+
+# 测试代码
+print(fibonacci(10))`,
+      javascript: `// JavaScript示例代码 - 数组去重和排序
+function processArray(arr) {
+  // 去重
+  const uniqueArr = [...new Set(arr)];
+  
+  // 排序
+  const sortedArr = uniqueArr.sort((a, b) => a - b);
+  
+  return sortedArr;
+}
+
+// 测试代码
+const testArray = [3, 1, 2, 4, 2, 1, 5, 3];
+console.log(processArray(testArray)); // [1, 2, 3, 4, 5]`
+    };
+
+    document.getElementById('load-analysis-example').addEventListener('click', () => {
+      const lang = document.getElementById('code-language-analysis').value;
+      document.getElementById('analysis-code-input').value = exampleCodes[lang] || exampleCodes.python;
+      updateLineNumbers('analysis-code-input', 'analysis-line-numbers');
+    });
+
+    document.getElementById('load-optimize-example').addEventListener('click', () => {
+      const lang = document.getElementById('code-language-optimize').value;
+      document.getElementById('optimize-code-input').value = exampleCodes[lang] || exampleCodes.python;
+      updateLineNumbers('optimize-code-input', 'optimize-line-numbers');
+    });
+
+    // 清空代码
+    document.getElementById('clear-analysis-code').addEventListener('click', () => {
+      document.getElementById('analysis-code-input').value = '';
+      updateLineNumbers('analysis-code-input', 'analysis-line-numbers');
+    });
+
+    document.getElementById('clear-optimize-code').addEventListener('click', () => {
+      document.getElementById('optimize-code-input').value = '';
+      updateLineNumbers('optimize-code-input', 'optimize-line-numbers');
+    });
+
+    // 复制代码
+    document.getElementById('copy-analysis-code').addEventListener('click', () => {
+      const code = document.getElementById('analysis-code-input').value;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('代码已复制到剪贴板');
+      });
+    });
+
+    document.getElementById('copy-optimize-code').addEventListener('click', () => {
+      const code = document.getElementById('optimize-code-input').value;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('代码已复制到剪贴板');
+      });
+    });
+
+    // 发送消息函数
+    function sendMessage(inputElement, messagesContainer, endpoint) {
+      const question = inputElement.value.trim();
+      if (!question) return;
+
+      // 显示加载中
+      loadingIndicator.classList.remove('hidden');
+
+      // 获取当前用户类型
+      const currentType = sessionStorage.getItem('userType') || 'beginner';
+      const typeNames = {
+        'beginner': '初学者模式',
+        'intermediate': '中级开发者模式',
+        'advanced': '高级开发者模式',
+        'teacher': '教育工作者模式'
+      };
+      
+      // 显示用户问题和当前模式
+      const userMessage = document.createElement('div');
+      userMessage.classList.add('flex', 'items-start', 'space-x-3', 'message-appear');
+      userMessage.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white shrink-0">
+          <i class="fa-solid fa-user"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="bg-white dark:bg-dark-600 p-3 rounded-lg shadow-sm">
+            <p>${question}</p>
+            <div class="mt-2 text-xs text-primary-600 dark:text-primary-400">
+              <i class="fa-solid fa-user-tag mr-1"></i> ${typeNames[currentType]}
+            </div>
+          </div>
+          <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">刚刚</div>
+        </div>
+      `;
+      messagesContainer.appendChild(userMessage);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+      // 调用API
+      fetch('/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ question: question })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('服务器响应错误');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // 隐藏加载中
+        loadingIndicator.classList.add('hidden');
+
+        // 显示AI回复
+        const aiMessage = document.createElement('div');
+        aiMessage.classList.add('flex', 'items-start', 'space-x-3', 'message-appear');
+        aiMessage.innerHTML = `
+          <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white shrink-0">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="bg-white dark:bg-dark-600 p-3 rounded-lg shadow-sm markdown-content">
+              ${marked.parse(data.reply)}
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">刚刚</div>
+          </div>
+        `;
+        messagesContainer.appendChild(aiMessage);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // 高亮代码块
+        document.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightElement(block);
+          
+          // 添加代码复制按钮
+          const codeBlock = block.closest('pre');
+          if (!codeBlock.classList.contains('code-block')) {
+            codeBlock.classList.add('code-block');
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'code-copy-btn';
+            copyBtn.innerHTML = '<i class="fa-solid fa-copy mr-1"></i>复制';
+            codeBlock.appendChild(copyBtn);
+          }
+        });
+
+        // 更新对话历史
+        updateConversationHistory();
+
+        // 清空输入框
+        inputElement.value = '';
+      })
+      .catch(error => {
+        // 隐藏加载中
+        loadingIndicator.classList.add('hidden');
+
+        // 显示错误消息
+        const errorMessage = document.createElement('div');
+        errorMessage.classList.add('flex', 'items-start', 'space-x-3', 'message-appear');
+        errorMessage.innerHTML = `
+          <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white shrink-0">
+            <i class="fa-solid fa-circle-exclamation"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg shadow-sm">
+              <p class="text-red-600 dark:text-red-400">发生错误: ${error.message}</p>
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">刚刚</div>
+          </div>
+        `;
+        messagesContainer.appendChild(errorMessage);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      });
+    }
+
+    // 聊天发送
+    const questionInput = document.getElementById('question-input');
+    const askQuestion = document.getElementById('ask-question');
+    const chatMessages = document.getElementById('chat-messages');
+    const loadingIndicator = document.getElementById('loading-indicator');
+
+    askQuestion.addEventListener('click', () => {
+      sendMessage(questionInput, chatMessages, 'chat');
+    });
+
+    // 问题解答发送
+    const questionInputQa = document.getElementById('question-input-qa');
+    const askQuestionQa = document.getElementById('ask-question-qa');
+    const qaMessages = document.getElementById('qa-messages');
+
+    askQuestionQa.addEventListener('click', () => {
+      sendMessage(questionInputQa, qaMessages, 'chat');
+    });
+
+    // 代码分析
+    const analyzeCodeBtn = document.getElementById('analyze-code-btn');
+    const analysisCodeInput = document.getElementById('analysis-code-input');
+    const analysisResults = document.getElementById('analysis-results');
+    const analysisPlaceholder = document.getElementById('analysis-placeholder');
+
+    analyzeCodeBtn.addEventListener('click', () => {
+      const code = analysisCodeInput.value.trim();
+      if (!code) return;
+
+      // 显示加载中
+      loadingIndicator.classList.remove('hidden');
+
+      // 获取当前用户类型
+      const currentType = sessionStorage.getItem('userType') || 'beginner';
+      const typeNames = {
+        'beginner': '初学者模式',
+        'intermediate': '中级开发者模式',
+        'advanced': '高级开发者模式',
+        'teacher': '教育工作者模式'
+      };
+
+      // 调用API
+      fetch('/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          question: `请分析以下${document.getElementById('code-language-analysis').value}代码:\n\n${code}` 
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('服务器响应错误');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // 隐藏加载中
+        loadingIndicator.classList.add('hidden');
+
+        // 显示分析结果
+        analysisResults.innerHTML = `
+          <div class="mb-4 p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
+            <div class="text-primary-600 dark:text-primary-400 text-sm">
+              <i class="fa-solid fa-user-tag mr-1"></i> ${typeNames[currentType]}
+            </div>
+          </div>
+          ${marked.parse(data.reply)}
+        `;
+        analysisResults.classList.remove('hidden');
+        analysisPlaceholder.classList.add('hidden');
+
+        // 高亮代码块
+        document.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightElement(block);
+          
+          // 添加代码复制按钮
+          const codeBlock = block.closest('pre');
+          if (!codeBlock.classList.contains('code-block')) {
+            codeBlock.classList.add('code-block');
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'code-copy-btn';
+            copyBtn.innerHTML = '<i class="fa-solid fa-copy mr-1"></i>复制';
+            codeBlock.appendChild(copyBtn);
+          }
+        });
+
+        // 更新对话历史
+        updateConversationHistory();
+      })
+      .catch(error => {
+        // 隐藏加载中
+        loadingIndicator.classList.add('hidden');
+
+        // 显示错误消息
+        analysisResults.innerHTML = `
+          <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+            <p class="text-red-600 dark:text-red-400">发生错误: ${error.message}</p>
+          </div>
+        `;
+        analysisResults.classList.remove('hidden');
+        analysisPlaceholder.classList.add('hidden');
+      });
+    });
+
+    // 代码优化
+    const optimizeCodeBtn = document.getElementById('optimize-code-btn');
+    const optimizeCodeInput = document.getElementById('optimize-code-input');
+    const optimizationResults = document.getElementById('optimization-results');
+    const optimizationPlaceholder = document.getElementById('optimization-placeholder');
+
+    optimizeCodeBtn.addEventListener('click', () => {
+      const code = optimizeCodeInput.value.trim();
+      if (!code) return;
+
+      // 显示加载中
+      loadingIndicator.classList.remove('hidden');
+
+      // 获取当前用户类型
+      const currentType = sessionStorage.getItem('userType') || 'beginner';
+      const typeNames = {
+        'beginner': '初学者模式',
+        'intermediate': '中级开发者模式',
+        'advanced': '高级开发者模式',
+        'teacher': '教育工作者模式'
+      };
+
+      const optimizeOption = document.getElementById('optimize-options').value;
+      let optimizePrompt = `请优化以下${document.getElementById('code-language-optimize').value}代码`;
+      
+      if (optimizeOption === 'performance') {
+        optimizePrompt += '，重点提高性能:';
+      } else if (optimizeOption === 'readability') {
+        optimizePrompt += '，重点提高可读性和可维护性:';
+      } else if (optimizeOption === 'security') {
+        optimizePrompt += '，重点提高安全性:';
+      } else {
+        optimizePrompt += '，进行综合优化:';
+      }
+      
+      optimizePrompt += `\n\n${code}`;
+
+      // 调用API
+      fetch('/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          question: optimizePrompt 
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('服务器响应错误');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // 隐藏加载中
+        loadingIndicator.classList.add('hidden');
+
+        // 显示优化结果
+        optimizationResults.innerHTML = `
+          <div class="mb-4 p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
+            <div class="text-primary-600 dark:text-primary-400 text-sm">
+              <i class="fa-solid fa-user-tag mr-1"></i> ${typeNames[currentType]}
+            </div>
+            <div class="text-primary-600 dark:text-primary-400 text-sm mt-1">
+              <i class="fa-solid fa-bullseye mr-1"></i> 优化目标: ${document.getElementById('optimize-options').selectedOptions[0].text}
+            </div>
+          </div>
+          ${marked.parse(data.reply)}
+        `;
+        optimizationResults.classList.remove('hidden');
+        optimizationPlaceholder.classList.add('hidden');
+
+        // 高亮代码块
+        document.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightElement(block);
+          
+          // 添加代码复制按钮
+          const codeBlock = block.closest('pre');
+          if (!codeBlock.classList.contains('code-block')) {
+            codeBlock.classList.add('code-block');
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'code-copy-btn';
+            copyBtn.innerHTML = '<i class="fa-solid fa-copy mr-1"></i>复制';
+            codeBlock.appendChild(copyBtn);
+          }
+        });
+
+        // 更新对话历史
+        updateConversationHistory();
+      })
+      .catch(error => {
+        // 隐藏加载中
+        loadingIndicator.classList.add('hidden');
+
+        // 显示错误消息
+        optimizationResults.innerHTML = `
+          <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+            <p class="text-red-600 dark:text-red-400">发生错误: ${error.message}</p>
+          </div>
+        `;
+        optimizationResults.classList.remove('hidden');
+        optimizationPlaceholder.classList.add('hidden');
+      });
+    });
+
+    // 清空历史记录
+    const clearHistory = document.getElementById('clear-history');
+    const clearChatHistory = document.getElementById('clear-chat-history');
+    const clearQaHistory = document.getElementById('clear-qa-history');
+
+    function clearHistoryConfirm(message, container) {
+      if (confirm(message)) {
+        container.innerHTML = '';
+        
+        // 重新添加欢迎消息
+        if (container.id === 'chat-messages') {
+          container.innerHTML = `
+            <div class="flex items-start space-x-3 message-appear">
+              <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white shrink-0">
+                <i class="fa-solid fa-robot"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="bg-white dark:bg-dark-600 p-3 rounded-lg shadow-sm markdown-content">
+                  <p>你好！我是编程教育智能体，可以帮助你解决编程问题、评估代码质量、优化代码性能以及解答技术问题。</p>
+                  <p>你可以尝试：</p>
+                  <ul>
+                    <li>直接向我提问编程相关问题</li>
+                    <li>粘贴代码让我评估质量</li>
+                    <li>让我优化你的代码性能</li>
+                  </ul>
+                  <p>请先选择上方适合你的用户类型，然后开始提问吧！</p>
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">刚刚</div>
+              </div>
+            </div>
+          `;
+        } else if (container.id === 'qa-messages') {
+          container.innerHTML = `
+            <div class="flex items-start space-x-3 message-appear">
+              <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white shrink-0">
+                <i class="fa-solid fa-robot"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="bg-white dark:bg-dark-600 p-3 rounded-lg shadow-sm markdown-content">
+                  <p>你好！我是编程教育智能助手，可以解答各种技术问题。</p>
+                  <p>你可以向我提问关于：</p>
+                  <ul>
+                    <li>编程语言语法和特性</li>
+                    <li>算法和数据结构</li>
+                    <li>框架和库的使用</li>
+                    <li>系统设计问题</li>
+                    <li>调试和错误解决</li>
+                  </ul>
+                  <p>请先选择上方适合你的用户类型，然后详细描述你的问题！</p>
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">刚刚</div>
+              </div>
+            </div>
+          `;
+        }
+      }
+    }
+
+    clearHistory.addEventListener('click', () => {
+      clearHistoryConfirm('确定要清空所有历史记录吗？', chatMessages);
+      analysisResults.innerHTML = '';
+      analysisResults.classList.add('hidden');
+      analysisPlaceholder.classList.remove('hidden');
+      optimizationResults.innerHTML = '';
+      optimizationResults.classList.add('hidden');
+      optimizationPlaceholder.classList.remove('hidden');
+      clearHistoryConfirm('确定要清空所有历史记录吗？', qaMessages);
+    });
+
+    clearChatHistory.addEventListener('click', () => {
+      clearHistoryConfirm('确定要清空聊天记录吗？', chatMessages);
+    });
+
+    clearQaHistory.addEventListener('click', () => {
+      clearHistoryConfirm('确定要清空问题解答记录吗？', qaMessages);
+    });
+
+    // 切换深色/浅色模式
+    const themeToggle = document.getElementById('theme-toggle');
+    let isDarkMode = localStorage.getItem('darkMode') === 'true';
+
+    function applyTheme() {
+      if (isDarkMode) {
+        document.documentElement.classList.add('dark');
+        themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+      } else {
+        document.documentElement.classList.remove('dark');
+        themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+      }
+      localStorage.setItem('darkMode', isDarkMode);
+    }
+
+    // 初始化主题
+    applyTheme();
+
+    themeToggle.addEventListener('click', () => {
+      isDarkMode = !isDarkMode;
+      applyTheme();
+    });
+
+    // 快捷键支持
+    questionInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && e.shiftKey) {
+        e.preventDefault();
+        sendMessage(questionInput, chatMessages, 'chat');
+      }
+    });
+
+    questionInputQa.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && e.shiftKey) {
+        e.preventDefault();
+        sendMessage(questionInputQa, qaMessages, 'chat');
+      }
+    });
+
+    // 下载结果
+    document.getElementById('download-analysis-result').addEventListener('click', () => {
+      const content = analysisResults.textContent;
+      downloadText(content, '代码分析结果.txt');
+    });
+
+    document.getElementById('download-optimize-result').addEventListener('click', () => {
+      const content = optimizationResults.textContent;
+      downloadText(content, '代码优化结果.txt');
+    });
+
+    function downloadText(text, filename) {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // 更新对话历史函数
+    function updateConversationHistory() {
+      const historyContainer = document.getElementById('conversation-history');
+      
+      fetch('/get_conversations')
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            historyContainer.innerHTML = '';
+            
+            data.conversations.forEach((conv, index) => {
+              const item = document.createElement('div');
+              item.className = 'conversation-item';
+              item.textContent = conv.title || `对话 ${index + 1}`;
+              item.addEventListener('click', () => {
+                loadConversation(index);
+              });
+              historyContainer.appendChild(item);
+            });
+          }
+        })
+        .catch(error => {
+          console.error('获取对话历史失败:', error);
+        });
+    }
+
+    // 加载对话函数
+    function loadConversation(conversationId) {
+      fetch(`/get_conversation/${conversationId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = '';
+            
+            data.conversation.history.forEach(message => {
+              const isUser = message.role === 'user';
+              const messageDiv = document.createElement('div');
+              messageDiv.classList.add('flex', 'items-start', 'space-x-3', 'message-appear');
+              messageDiv.innerHTML = `
+                <div class="w-8 h-8 rounded-full ${isUser ? 'bg-primary-600' : 'bg-secondary-600'} flex items-center justify-center text-white shrink-0">
+                  <i class="fa-solid ${isUser ? 'fa-user' : 'fa-robot'}"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="bg-white dark:bg-dark-600 p-3 rounded-lg shadow-sm ${isUser ? '' : 'markdown-content'}">
+                    ${isUser ? message.content : marked.parse(message.content)}
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">刚刚</div>
+                </div>
+              `;
+              chatMessages.appendChild(messageDiv);
+            });
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // 在移动端自动关闭侧边栏
+            if (window.innerWidth < 768) {
+              document.getElementById('sidebar').classList.remove('show');
+            }
+          }
+        })
+        .catch(error => {
+          console.error('加载对话失败:', error);
+        });
+    }
+  </script>
+</body>
+</html>
